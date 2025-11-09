@@ -1,2 +1,15 @@
 ###
-GET http://localhost:9000/
+GET http://localhost:9000/health
+
+###
+GET http://localhost:9000/verify
+
+###
+GET http://localhost:9000/cart
+
+###
+GET http://localhost:9000/profile
+
+###
+GET http://localhost:9000/order
+
