@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"go-ecommerce-app/internal/api/rest"
+	"go-ecommerce-app/internal/dto"
+	"go-ecommerce-app/internal/service"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,6 +11,7 @@ import (
 
 type UserHandler struct {
 	// User services
+	svc service.UserService
 }
 
 func SetupUserRoutes(rh *rest.RestHandler) {
@@ -16,7 +19,10 @@ func SetupUserRoutes(rh *rest.RestHandler) {
 
 	// Create instance of the Services and pass to UserHandler
 
-	handler := UserHandler{}
+	svc := service.UserService{}
+	handler := UserHandler{
+		svc: svc,
+	}
 
 	// endpoint (public)
 	app.Post("/register", handler.Register)
@@ -28,8 +34,8 @@ func SetupUserRoutes(rh *rest.RestHandler) {
 	app.Post("/profile", handler.CreateProfile)
 	app.Get("/profile", handler.GetProfile)
 
-	app.Post("/cart", handler.AddToCard)
-	app.Get("/cart", handler.GetCard)
+	app.Post("/cart", handler.AddToCart)
+	app.Get("/cart", handler.GetCart)
 	app.Get("/order", handler.GetOrders)
 	app.Get("/order/:id", handler.GetOrder)
 
@@ -38,14 +44,46 @@ func SetupUserRoutes(rh *rest.RestHandler) {
 }
 
 func (h *UserHandler) Register(ctx *fiber.Ctx) error {
+	user := dto.UserSignup{}
+	err := ctx.BodyParser(&user)
+
+	if err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
+			"message": "Please provide a valid input",
+		})
+	}
+
+	token, err := h.svc.SignUp(user)
+
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"message": "Error on sign up",
+		})
+	}
+
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "Register",
+		"message": token,
 	})
 }
 
 func (h *UserHandler) Login(ctx *fiber.Ctx) error {
+	user := dto.UserLogin{}
+	err := ctx.BodyParser(&user)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"message": "Error on login",
+		})
+	}
+
+	token, err := h.svc.Login(user)
+
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"message": "Error on login",
+		})
+	}
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "Login",
+		"message": token,
 	})
 }
 
@@ -73,15 +111,15 @@ func (h *UserHandler) GetProfile(ctx *fiber.Ctx) error {
 	})
 }
 
-func (h *UserHandler) AddToCard(ctx *fiber.Ctx) error {
+func (h *UserHandler) AddToCart(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "add to card",
+		"message": "add to Cart",
 	})
 }
 
-func (h *UserHandler) GetCard(ctx *fiber.Ctx) error {
+func (h *UserHandler) GetCart(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "get card",
+		"message": "get Cart",
 	})
 }
 func (h *UserHandler) GetOrders(ctx *fiber.Ctx) error {

@@ -1,0 +1,9 @@
+###
+POST http://localhost:9000/register
+Content-Type: application/json
+
+{
+    "email": "dat@gmail.com",
+    "password": "Oces2023@",
+    "phone": "647 778 7816"
+}
