@@ -3,6 +3,7 @@ package handlers
 import (
 	"go-ecommerce-app/internal/api/rest"
 	"go-ecommerce-app/internal/dto"
+	"go-ecommerce-app/internal/repository"
 	"go-ecommerce-app/internal/service"
 	"net/http"
 
@@ -19,7 +20,9 @@ func SetupUserRoutes(rh *rest.RestHandler) {
 
 	// Create instance of the Services and pass to UserHandler
 
-	svc := service.UserService{}
+	svc := service.UserService{
+		Repo: repository.NewUserRepository(rh.DB),
+	}
 	handler := UserHandler{
 		svc: svc,
 	}
